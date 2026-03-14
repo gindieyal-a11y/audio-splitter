@@ -19,7 +19,8 @@ def convert_to_mp3(input_path, output_path):
         "-i", input_path,
         "-vn",
         "-acodec", "libmp3lame",
-        "-ab", "192k",
+        "-ab", "128k",
+        "-ar", "22050",
         output_path
     ], check=True)
 
@@ -37,12 +38,10 @@ def split_audio(mp3_path, output_prefix):
 
 @app.route("/process", methods=["POST"])
 def process_audio():
-
     if "file" not in request.files:
         return jsonify({"error": "no file"}), 400
 
     file = request.files["file"]
-
     file_id = str(uuid.uuid4())
 
     input_path = os.path.join(UPLOAD_FOLDER, file_id + "_" + file.filename)
@@ -53,7 +52,6 @@ def process_audio():
     convert_to_mp3(input_path, mp3_path)
 
     split_prefix = os.path.join(OUTPUT_FOLDER, file_id)
-
     split_audio(mp3_path, split_prefix)
 
     files = sorted([
